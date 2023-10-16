@@ -1,6 +1,5 @@
 import pandas as pd
 
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.callbacks import EarlyStopping
@@ -15,8 +14,8 @@ import matplotlib.pyplot as plt
 
 # Load and preprocess data
 def load_data():
-    data = pd.read_excel('crashCourse/mlModels/activeStatsFilled.xlsx')
-    rookieData = pd.read_excel('crashCourse/mlModels/rookiesFilled.xlsx')
+    data = pd.read_excel('data/activeStatsFilled.xlsx')
+    rookieData = pd.read_excel('data/rookiesFilled.xlsx')
 
     training = data.drop(['score', 'Name', 'wAv', 'draftYear', 'Yas', 'ProGames', 'yrs', 'totwAv'], axis=1)
     target = data['wAv']
@@ -24,7 +23,7 @@ def load_data():
     rookie_names = rookieData['Name'].values  # Extract the 'Name' column from rookieData
     rookies = rookieData.drop(['score', 'Name', 'wAv', 'draftYear', 'Yas', 'ProGames', 'yrs', 'totwAv'], axis=1)
 
-    # Convert all column names to strings
+    # Convert all column names to strings (For the scaler)
     training.columns = training.columns.astype(str)
     rookies.columns = rookies.columns.astype(str)
 
@@ -39,11 +38,11 @@ def load_data():
 def build_model(input_shape):
     model = keras.Sequential([
         Dense(32, input_dim=input_shape, activation='relu'),
-        Dropout(0.5),
+        Dropout(0.6),
         #Dense(64, activation='relu', kernel_regularizer=l2(0.01)),
         #Dropout(0.5),
         Dense(32, activation='relu', kernel_regularizer=l2(0.01)),
-        Dropout(0.5),
+        Dropout(0.6),
         Dense(1, activation='relu')
     ])
 
@@ -94,6 +93,6 @@ def main():
     for name, pred in zip(rookie_names, predictions):
         print(f"{name}: {pred[0]:.2f}")
 
-# Entry point
+
 if __name__ == "__main__":
     main()
