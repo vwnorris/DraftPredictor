@@ -46,7 +46,7 @@ def build_model(input_shape):
         Dense(1, activation='relu')
     ])
 
-    model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
+    model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['mean_squared_error'])
     return model
 
 
@@ -54,9 +54,9 @@ def plot_history(history):
     # Summarize history for loss
     plt.figure(figsize=(10, 5))
 
-    plt.plot(history.history['loss'], label='Training Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.title('Model Loss')
+    plt.plot(history.history['loss'], label='Training Loss', color='teal')
+    plt.plot(history.history['val_loss'], label='Validation Loss', color='deeppink')
+    plt.title('Model Loss over epochs')
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(loc='upper right')
@@ -79,7 +79,7 @@ def main():
     early_stop = EarlyStopping(monitor='val_loss', patience=82, verbose=1, restore_best_weights=True)
 
     history = model.fit(
-        X_train, y_train, epochs=800, batch_size=32, verbose=1, 
+        X_train, y_train, epochs=800, batch_size=30, verbose=1, 
         validation_data=(X_test, y_test), callbacks=[early_stop]
     )
     plot_history(history)
