@@ -20,4 +20,4 @@ def filler(filename: str):
     # Save the result back to Excel
     df.to_excel(newFile, index=False)
 
-filler('crashCourse/mlModels/rookies.xlsx')
+filler('data/activeStats.xlsx')

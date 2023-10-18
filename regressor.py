@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
@@ -8,6 +9,7 @@ from tensorflow.keras.regularizers import l2
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 
 import matplotlib.pyplot as plt
 
@@ -17,6 +19,7 @@ def load_data():
     data = pd.read_excel('data/activeStatsFilled.xlsx')
     rookieData = pd.read_excel('data/rookiesFilled.xlsx')
 
+    player_names = data['Name'].values  # This array aligns with your training data
     training = data.drop(['score', 'Name', 'wAv', 'draftYear', 'Yas', 'ProGames', 'yrs', 'totwAv'], axis=1)
     target = data['wAv']
 
@@ -32,21 +35,45 @@ def load_data():
     training = scaler.fit_transform(training)  # Compute mean and var for training data and transform it
     rookies = scaler.transform(rookies)        # Use same mean and var to transform rookies data
 
+    # plot_pca(training, player_names)
+
     return training, target, rookies, rookie_names
+
+# Plotting the PCA
+def plot_pca(training_data, player_names):
+    # Perform PCA
+    pca = PCA(n_components=2)  # Only the first two principal components are retained
+    principalComponents = pca.fit_transform(training_data)
+
+    # Creating a DataFrame for the principal components to facilitate plotting
+    principalDf = pd.DataFrame(data=principalComponents, columns=['PC1', 'PC2'])
+    principalDf['Name'] = player_names
+
+    # Plot the PCA
+    plt.figure(figsize=(12, 8))
+    for i in range(len(principalDf)):
+        plt.scatter(principalDf.at[i, 'PC1'], principalDf.at[i, 'PC2'], c='b', marker='o', alpha=0.5)
+        plt.text(principalDf.at[i, 'PC1'], principalDf.at[i, 'PC2'], principalDf.at[i, 'Name'], fontsize=9, ha='right')  # Adjusting text properties for clarity
+
+    plt.title('Principal Component Analysis (PCA) of Training Data')
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.grid()
+    plt.show()
 
 # Define and compile the model
 def build_model(input_shape):
     model = keras.Sequential([
-        Dense(32, input_dim=input_shape, activation='relu'),
+        Dense(32, input_dim=input_shape, activation='tanh'),
         Dropout(0.6),
         #Dense(64, activation='relu', kernel_regularizer=l2(0.01)),
         #Dropout(0.5),
-        Dense(32, activation='relu', kernel_regularizer=l2(0.01)),
+        Dense(32, activation='tanh', kernel_regularizer=l2(0.01)),
         Dropout(0.6),
         Dense(1, activation='relu')
     ])
 
-    model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['mean_squared_error'])
+    model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
     return model
 
 
@@ -68,9 +95,10 @@ def plot_history(history):
 def main():
     # Load data
     training, target, rookies, rookie_names = load_data()
+  
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(training, target, test_size=0.1, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(training, target, test_size=0.2, random_state=42)
 
     # Build the model
     model = build_model(X_train.shape[1])
