@@ -1,11 +1,22 @@
 # DraftPredictor
-DraftPredictor is a Python application designed to utilize advanced data analytics and predictive modeling techniques to estimate the future success of NFL wide receiver prospects. By inputting college statistics, physical attributes, combine data, and more, users can receive projections about a player's potential professional production and longevity. This tool is perfect for scouts, coaches, fantasy football players, and NFL enthusiasts eager to get insights into the next generation of top performing wide receivers.
+## 🚧Construction phase🏗️: 
+This is a "just-for-fun" datascience project with a goal of <em>revolutionizing</em> the NFL draft in the coming years. The project contains a dataset of NFL WRs drafted from 2018 to 2020, with their measureables and college statistics. Their wAv/year is then used to train a neural network to predict how valuable new WRs entering the league is going to be. All code is in python, and the data is in xlsx files. 
 
-## Features:
-* Data Integration: Compiles a comprehensive dataset from various sources, including college football statistics, player measurements, historical data, and combine results.
-* Predictive Modeling: Uses machine learning algorithms to forecast the success of wide receiver draft prospects in the NFL.
-* Customizable Projections: Allows users to tweak variables and see how different input values could potentially affect a player's projection.
-* User-Friendly Interface: Whether running the script in a standard Python environment or through a web-based platform, users can easily navigate and understand the process.
+## Files:
+* Data-folder: This folder contains the data used in training and testing the model.
+* Regressor: Contains reading the data, plotting PLC, the model, plotting the loss over the epochs as well as training and testing the model. 
+* SpreadFiller: Fills the missing values in the data with averages of the other values in the column. 
+* SpreadFixer: Converts the measureables of the athletes from ft to cm, and from lbs to kg. 
+* NLP: Not used in the project, only for experimenting with adding some NLP features to the model in the future.
+
+## Future features: 
+* More information in the dataset:
+  * Rating the college
+  * Information about position (slot, posession, deep threat, etc)
+  * Personality (maturity issues, etc)
+  * Injuries
+* More draft classes in the dataset (2021, 2022 missing)
+* In the future, not only WRs. 
 
 ## Running the model:
 
@@ -13,3 +24,7 @@ DraftPredictor is a Python application designed to utilize advanced data analyti
 python3 regressor.py
 ```
 
+## Contact:
+[GitHub](https://github.com/vwnorris)
+[LinkedIn]([https://link-url-here.org](https://www.linkedin.com/in/victor-w-t-norris-b58336107/)https://www.linkedin.com/in/victor-w-t-norris-b58336107/)
+Email: Vic@Norris.no
