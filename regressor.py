@@ -7,9 +7,13 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.regularizers import l2
 
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
 
 import matplotlib.pyplot as plt
 
@@ -20,11 +24,11 @@ def load_data():
     rookieData = pd.read_excel('data/rookiesFilled.xlsx')
 
     player_names = data['Name'].values  # This array aligns with your training data
-    training = data.drop(['score', 'Name', 'wAv', 'draftYear', 'Yas', 'ProGames', 'yrs', 'totwAv'], axis=1)
+    training = data.drop(['score', 'Name', 'wAv', 'draftYear', 'yrs', 'totwAv', 'Pick'], axis=1)
     target = data['wAv']
 
     rookie_names = rookieData['Name'].values  # Extract the 'Name' column from rookieData
-    rookies = rookieData.drop(['score', 'Name', 'wAv', 'draftYear', 'Yas', 'ProGames', 'yrs', 'totwAv'], axis=1)
+    rookies = rookieData.drop(['score', 'Name', 'wAv', 'draftYear', 'yrs', 'totwAv', 'Pick'], axis=1)
 
     # Convert all column names to strings (For the scaler)
     training.columns = training.columns.astype(str)
@@ -38,6 +42,9 @@ def load_data():
     # plot_pca(training, player_names)
 
     return training, target, rookies, rookie_names
+
+
+
 
 # Plotting the PCA
 def plot_pca(training_data, player_names):
@@ -61,20 +68,26 @@ def plot_pca(training_data, player_names):
     plt.grid()
     plt.show()
 
+
+
+
 # Define and compile the model
 def build_model(input_shape):
     model = keras.Sequential([
-        Dense(32, input_dim=input_shape, activation='tanh'),
-        Dropout(0.6),
-        #Dense(64, activation='relu', kernel_regularizer=l2(0.01)),
-        #Dropout(0.5),
-        Dense(32, activation='tanh', kernel_regularizer=l2(0.01)),
-        Dropout(0.6),
+        Dense(32, input_dim=input_shape, activation='relu'),
+        Dropout(0.2),
+        Dense(64, activation='relu', kernel_regularizer=l2(0.01)),
+        Dropout(0.2),
+        Dense(32, activation='relu', kernel_regularizer=l2(0.01)),
+        Dropout(0.2),
         Dense(1, activation='relu')
     ])
 
     model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
     return model
+
+
+
 
 
 def plot_history(history):
@@ -91,6 +104,27 @@ def plot_history(history):
     plt.show()
 
 
+
+
+def random_forest_regression(X_train, y_train, X_test, y_test, n_estimators=100, max_depth=None):
+    # Initialize the Random Forest Regressor
+    rf = RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
+
+    # Fit the model to the training data
+    rf.fit(X_train, y_train)
+
+    # Predict on the test data
+    y_pred = rf.predict(X_test)
+
+    # Calculate the mean squared error
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"Random Forest Regressor MSE: {mse:.2f}")
+
+    return rf
+
+
+
+
 # Main routine
 def main():
     # Load data
@@ -98,19 +132,24 @@ def main():
   
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(training, target, test_size=0.2, random_state=42)
-
+    X_train, X_test, y_train, y_test = train_test_split(training, target, test_size=0.2, random_state=10)
+    
+    #############################################################################################################
+    ######################################## Neural network model ###############################################
+    #############################################################################################################
+    """
     # Build the model
     model = build_model(X_train.shape[1])
 
     # Train the model
-    early_stop = EarlyStopping(monitor='val_loss', patience=82, verbose=1, restore_best_weights=True)
+    early_stop = EarlyStopping(monitor='val_loss', patience=200, verbose=1, restore_best_weights=True)
 
     history = model.fit(
-        X_train, y_train, epochs=800, batch_size=30, verbose=1, 
+        X_train, y_train, epochs=800, batch_size=40, verbose=1, 
         validation_data=(X_test, y_test), callbacks=[early_stop]
     )
-    plot_history(history)
+
+    #plot_history(history)
 
     # Evaluate the model performance
     loss, mse = model.evaluate(X_test, y_test, verbose=0)
@@ -120,7 +159,18 @@ def main():
     predictions = model.predict(rookies)
     for name, pred in zip(rookie_names, predictions):
         print(f"{name}: {pred[0]:.2f}")
+        
+    """
+    #############################################################################################################
+    #################################### Random forrest regressor ###############################################
+    #############################################################################################################
+    rf_model = random_forest_regression(X_train, y_train, X_test, y_test, n_estimators=100, max_depth=None)
 
+
+    # Make predictions on rookie data
+    rookie_predictions = rf_model.predict(rookies)
+    for name, pred in zip(rookie_names, rookie_predictions):
+        print(f"{name}: {pred:.2f}")
 
 if __name__ == "__main__":
     main()

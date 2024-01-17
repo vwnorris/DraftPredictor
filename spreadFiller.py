@@ -1,5 +1,3 @@
-print("Hello world")
-
 import pandas as pd
 import numpy as np
 
@@ -20,4 +18,5 @@ def filler(filename: str):
     # Save the result back to Excel
     df.to_excel(newFile, index=False)
 
-filler('data/activeStats.xlsx')
+#filler('data/activeStats.xlsx')
+filler('data/rookies.xlsx')
