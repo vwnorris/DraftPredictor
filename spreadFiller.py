@@ -18,5 +18,5 @@ def filler(filename: str):
     # Save the result back to Excel
     df.to_excel(newFile, index=False)
 
-#filler('data/activeStats.xlsx')
-filler('data/rookies.xlsx')
+filler('data/activeStats.xlsx')
+#filler('data/rookies.xlsx')

@@ -166,11 +166,12 @@ def main():
     #############################################################################################################
     rf_model = random_forest_regression(X_train, y_train, X_test, y_test, n_estimators=100, max_depth=None)
 
-
+    
     # Make predictions on rookie data
     rookie_predictions = rf_model.predict(rookies)
     for name, pred in zip(rookie_names, rookie_predictions):
         print(f"{name}: {pred:.2f}")
+    
 
 if __name__ == "__main__":
     main()

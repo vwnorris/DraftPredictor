@@ -39,4 +39,4 @@ def fixer(filename :str):
 
     print(df)
 
-fixer("data/activeStatsFilled.xlsx")
+fixer("data/rookiesFilled.xlsx")
