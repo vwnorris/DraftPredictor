@@ -7,7 +7,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.regularizers import l2
 
-
+from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
@@ -41,7 +41,7 @@ def load_data():
 
     # plot_pca(training, player_names)
 
-    return training, target, rookies, rookie_names
+    return training, target, rookies, rookie_names, player_names
 
 
 
@@ -122,22 +122,31 @@ def random_forest_regression(X_train, y_train, X_test, y_test, n_estimators=100,
 
     return rf
 
+def fit_nearest_neighbors(current_players, n_neighbors=1):
+    nn = NearestNeighbors(n_neighbors=n_neighbors, algorithm='ball_tree')
+    nn.fit(current_players)
+    return nn
+
+def find_closest_players(nn_model, current_player_names, rookies):
+    distances, indices = nn_model.kneighbors(rookies)
+    closest_players = current_player_names[indices]
+    return closest_players, distances
 
 
 
 # Main routine
 def main():
     # Load data
-    training, target, rookies, rookie_names = load_data()
+    training, target, rookies, rookie_names, player_names = load_data()
   
-
+    """
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(training, target, test_size=0.2, random_state=10)
     
     #############################################################################################################
     ######################################## Neural network model ###############################################
     #############################################################################################################
-    """
+    
     # Build the model
     model = build_model(X_train.shape[1])
 
@@ -160,7 +169,7 @@ def main():
     for name, pred in zip(rookie_names, predictions):
         print(f"{name}: {pred[0]:.2f}")
         
-    """
+    
     #############################################################################################################
     #################################### Random forrest regressor ###############################################
     #############################################################################################################
@@ -171,7 +180,20 @@ def main():
     rookie_predictions = rf_model.predict(rookies)
     for name, pred in zip(rookie_names, rookie_predictions):
         print(f"{name}: {pred:.2f}")
+    """
+    nn_model = fit_nearest_neighbors(training)
+    closest_players, distances = find_closest_players(nn_model, player_names, rookies)
     
+    # Combine into a list of tuples
+    combined_list = zip(rookie_names, closest_players.flatten(), distances.flatten())
+    
+    # Sort by distance (the third element in each tuple)
+    sorted_list = sorted(combined_list, key=lambda x: x[2])
+    
+    # Now print in sorted order
+    for rookie, closest_player, distance in sorted_list:
+        print(f"{rookie} - {closest_player}, distance: {distance:.2f}")
+
 
 if __name__ == "__main__":
     main()
